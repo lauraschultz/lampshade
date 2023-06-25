@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "@tarikjabiri/dxf": "^2.8.6",
-    "p5": "^1.6.0"
+    "p5": "^1.6.0",
+    "perlin-simplex": "0.0.3"
   }
 }
