@@ -27,7 +27,7 @@ const n = 5.6;
 const Z_NOISE_OFFSET = 0.006;
 
 // how similar shade values are to each other
-const NOISE_RADIUS = 0.45;
+const NOISE_RADIUS = 0.55;
 
 const getCircleCoordinates = (i) => {
 	const angleRad = (i / NUM_SHADES) * 2 * Math.PI;
@@ -51,44 +51,45 @@ const map = (x) => {
 
 for (let i = 0; i < NUM_SHADES; i++) {
 	// starting coordinates for shade
-	const x = i * X_SHADE_WIDTH_MM;
-	const y = i * Y_SHADE_WIDTH_MM;
+	const sX = i * X_SHADE_WIDTH_MM;
+	const sY = i * Y_SHADE_WIDTH_MM;
 
 	// left side
-	dxf.addLine(point3dmm(x, y), point3dmm(x, y + a));
-	dxf.addLine(point3dmm(x, y + a), point3dmm(x + b, y + a));
-	dxf.addLine(point3dmm(x + b, y + a), point3dmm(x + b, y + a + c));
-	dxf.addLine(point3dmm(x + b, y + a + c), point3dmm(x, y + a + c));
-	dxf.addLine(point3dmm(x, y + a + c), point3dmm(x, y + a + c + d));
-	dxf.addLine(point3dmm(x, y + a + c + d), point3dmm(x + b, y + a + c + d));
+	dxf.addLine(point3dmm(sX, sY), point3dmm(sX, sY + a));
+	dxf.addLine(point3dmm(sX, sY + a), point3dmm(sX + b, sY + a));
+	dxf.addLine(point3dmm(sX + b, sY + a), point3dmm(sX + b, sY + a + c));
+	dxf.addLine(point3dmm(sX + b, sY + a + c), point3dmm(sX, sY + a + c));
+	dxf.addLine(point3dmm(sX, sY + a + c), point3dmm(sX, sY + a + c + d));
+	dxf.addLine(point3dmm(sX, sY + a + c + d), point3dmm(sX + b, sY + a + c + d));
 	dxf.addLine(
-		point3dmm(x + b, y + a + c + d),
-		point3dmm(x + b, y + a + c + d + c)
+		point3dmm(sX + b, sY + a + c + d),
+		point3dmm(sX + b, sY + a + c + d + c)
 	);
 	dxf.addLine(
-		point3dmm(x + b, y + a + c + d + c),
-		point3dmm(x, y + a + c + d + c)
+		point3dmm(sX + b, sY + a + c + d + c),
+		point3dmm(sX, sY + a + c + d + c)
 	);
 	dxf.addLine(
-		point3dmm(x, y + a + c + d + c),
-		point3dmm(x, y + a + c + d + c + a)
+		point3dmm(sX, sY + a + c + d + c),
+		point3dmm(sX, sY + a + c + d + c + a)
 	);
 
 	// right side
 	const coords = getCircleCoordinates(i);
-	let prev = { x, y };
+	let prev = { x: sX, y: sY };
 	for (let m = 0; m < h; m += 0.5) {
 		const x1 =
 			l * Math.pow(1 - Math.pow(Math.abs((h / 2 - m) / (h / 2)), n), 1 / n);
 		const xNoise =
-			reduce(m) * map(simplex.noise3d(coords.x, coords.y, m * Z_NOISE_OFFSET)) +
-			x +
+			(m < 0.5 ? 0 : 1) *
+				map(simplex.noise3d(coords.x, coords.y, m * Z_NOISE_OFFSET)) +
+			sX +
 			x1;
-		dxf.addLine(point3dmm(prev.x, prev.y), point3dmm(xNoise, y + m));
+		dxf.addLine(point3dmm(prev.x, prev.y), point3dmm(xNoise, sY + m));
 		prev.x = xNoise;
-		prev.y = y + m;
+		prev.y = sY + m;
 	}
-	dxf.addLine(point3dmm(prev.x, prev.y), point3dmm(x, y + h));
+	dxf.addLine(point3dmm(prev.x, prev.y), point3dmm(sX, sY + h));
 }
 
 fs.writeFile("lampshade.dxf", dxf.stringify(), (err) => console.error(err));
